@@ -11,11 +11,13 @@ export class BoardComponent implements OnInit {
   squares: any[];
   xIsNext: boolean;
   winner: string;
+  user: string;
 
   constructor() {  
     this.squares = [];
     this.xIsNext = true;
     this.winner = ""; 
+    this.user = "";
   }
 
   ngOnInit(): void {
@@ -26,19 +28,48 @@ export class BoardComponent implements OnInit {
     this.squares = Array(9).fill(null);
     this.xIsNext = true;
     this.winner = "";
+    this.user = this.user == 'X' ? 'O' : 'X';
+
+    if (this.player != this.user)
+      this.makePcMove();
   }
 
   get player() {
     return this.xIsNext ? 'X' : 'O';
   }
 
-  makeMove(idx: number) {
-    if (!this.squares[idx] && !this.winner) {
-      this.squares.splice(idx, 1, this.player);
-      this.xIsNext = !this.xIsNext
-    }
+  get playerDescription() {
+    return this.player == this.user ? 'You' : 'The computer';
+  }
 
+  makeMove(idx: number) {
+    this.squares.splice(idx, 1, this.player);
     this.winner = this.calculateWinner();
+    if (!this.winner)
+      this.xIsNext = !this.xIsNext;
+  }
+
+  makePlayerMove(idx: number) {
+    if (!this.squares[idx] && !this.winner) {
+      this.makeMove(idx);
+
+      if (!this.winner)
+        this.makePcMove();
+    }
+  }
+
+  async makePcMove() {
+
+    // t h i n k i n g
+    await (() => new Promise( resolve => setTimeout(resolve, 1000)))();
+
+    // super simple for now: pick first empty spot
+    for (let idx = 0; idx < this.squares.length; idx++) {
+      if (!this.squares[idx]) {
+        this.makeMove(idx);
+        return;
+      }
+    }
   }
 
   calculateWinner() {
