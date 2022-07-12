@@ -1,5 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 
+export class Player {
+  GOALS: string[];
+  name: string;
+  token: string;
+  goal: string;
+  goalMet: boolean;
+
+  constructor(name: string) {
+    this.GOALS = ["win", "lose", "tie"];
+    this.name = name;
+    this.token = "";
+    this.goal = this.GOALS[Math.floor(Math.random() * this.GOALS.length)];
+    this.goalMet = false;
+  }
+
+  evaluateGoal(result: string) {
+    this.goalMet = result == this.goal;
+    return this.goalMet;
+  }
+}
+
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
@@ -11,13 +32,17 @@ export class BoardComponent implements OnInit {
   squares: any[];
   xIsNext: boolean;
   winner: string;
-  user: string;
+  goals: string[];
+  userPlayer: Player;
+  pcPlayer: Player;
 
   constructor() {  
     this.squares = [];
     this.xIsNext = true;
     this.winner = ""; 
-    this.user = "";
+    this.goals = ["win", "lose", "tie"];
+    this.userPlayer = new Player("You");
+    this.pcPlayer = new Player("The Computer");
   }
 
   ngOnInit(): void {
@@ -28,25 +53,44 @@ export class BoardComponent implements OnInit {
     this.squares = Array(9).fill(null);
     this.xIsNext = true;
     this.winner = "";
-    this.user = this.user == 'X' ? 'O' : 'X';
+    this.userPlayer.token = this.userPlayer.token == 'X' ? 'O' : 'X';
+    this.pcPlayer.token = this.userPlayer.token == 'X' ? 'O' : 'X';
 
-    if (this.player != this.user)
+    if (this.currentPlayer != this.userPlayer.token)
       this.makePcMove();
   }
 
-  get player() {
+  get currentPlayer() {
     return this.xIsNext ? 'X' : 'O';
   }
 
-  get playerDescription() {
-    return this.player == this.user ? 'You' : 'The computer';
+  get currentPlayerDescription() {
+    if (this.currentPlayer == this.userPlayer.token)
+      return this.userPlayer.name;
+    return this.pcPlayer.name;
   }
 
   makeMove(idx: number) {
-    this.squares.splice(idx, 1, this.player);
+    this.squares.splice(idx, 1, this.currentPlayer);
     this.winner = this.calculateWinner();
-    if (!this.winner)
+
+    // evaluate whether each player acheived their goal
+    if (this.winner == null) {
       this.xIsNext = !this.xIsNext;
+    }
+    if (this.winner == this.userPlayer.name) {
+      this.userPlayer.evaluateGoal("win");
+      this.pcPlayer.evaluateGoal("lose");
+    }
+    else if (this.winner == this.pcPlayer.name) {
+      this.userPlayer.evaluateGoal("lose");
+      this.pcPlayer.evaluateGoal("win");
+    }
+    // TODO: implement tie logic in winner calculation
+    else {
+      this.userPlayer.evaluateGoal("tie");
+      this.pcPlayer.evaluateGoal("tie");
+    }
   }
 
   makePlayerMove(idx: number) {
