@@ -1,7 +1,10 @@
 <h1>Current Player: {{ currentPlayer }} ({{ currentPlayerDescription }})</h1>
 <button (click)="newGame()">Start New Game</button>
+<h2 *ngIf="userPlayer.goal">
+    Your secret goal is to {{ userPlayer.goal }}.
+</h2>
 <h2 *ngIf="winner">
-    Player {{ winner }} ({{ currentPlayerDescription }}) won the game!
+    {{ winner === "-" ? "No one" : "Player" + winner + " (" + currentPlayerDescription + ")"}} won the game! You {{ userPlayer.goalMet ? "acheived" : "did not achieve" }} your goal{{ userPlayer.goalMet ? "!" : "." }}
 </h2>
 <main>
     <app-square *ngFor="let val of squares; let i = index" [value]="val" (click)="makePlayerMove(i)">

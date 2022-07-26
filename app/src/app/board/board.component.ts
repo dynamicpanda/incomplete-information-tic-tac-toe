@@ -36,7 +36,7 @@ export class BoardComponent implements OnInit {
   userPlayer: Player;
   pcPlayer: Player;
 
-  constructor() {  
+  constructor() {
     this.squares = [];
     this.xIsNext = true;
     this.winner = ""; 
@@ -53,6 +53,8 @@ export class BoardComponent implements OnInit {
     this.squares = Array(9).fill(null);
     this.xIsNext = true;
     this.winner = "";
+    this.userPlayer = new Player("You");
+    this.pcPlayer = new Player("The Computer");
     this.userPlayer.token = this.userPlayer.token == 'X' ? 'O' : 'X';
     this.pcPlayer.token = this.userPlayer.token == 'X' ? 'O' : 'X';
 
@@ -75,19 +77,18 @@ export class BoardComponent implements OnInit {
     this.winner = this.calculateWinner();
 
     // evaluate whether each player acheived their goal
-    if (this.winner == null) {
+    if (!this.winner) {
       this.xIsNext = !this.xIsNext;
     }
-    if (this.winner == this.userPlayer.name) {
+    if (this.winner === this.userPlayer.token) {
       this.userPlayer.evaluateGoal("win");
       this.pcPlayer.evaluateGoal("lose");
     }
-    else if (this.winner == this.pcPlayer.name) {
+    else if (this.winner === this.pcPlayer.token) {
       this.userPlayer.evaluateGoal("lose");
       this.pcPlayer.evaluateGoal("win");
     }
-    // TODO: implement tie logic in winner calculation
-    else {
+    else if (this.winner === "-") {
       this.userPlayer.evaluateGoal("tie");
       this.pcPlayer.evaluateGoal("tie");
     }
@@ -127,6 +128,7 @@ export class BoardComponent implements OnInit {
       [0, 4, 8],
       [2, 4, 6]
     ];
+    let emptySquare = Boolean(this.squares.filter(square => square == null).length);
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (
@@ -137,7 +139,12 @@ export class BoardComponent implements OnInit {
         return this.squares[a];
       }
     }
-    return null;
+    // if at least one empty square, no winner yet
+    if (emptySquare)
+      return null;
+    
+    // tie!
+    return "-";
   }
 
 }
